@@ -1,0 +1,10 @@
+#!/bin/sh
+set -xev
+rm -fr packages
+#dnf download $1 --destdir packages
+export PATH=.:$PATH
+echo $PWD
+DEPS=$(rpmResolver $1)
+dnf download $DEPS --destdir packages
+rm -fr ${1}-dependencies
+mv packages ${1}-dependencies

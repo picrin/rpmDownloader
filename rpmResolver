@@ -1,0 +1,16 @@
+#!/bin/sh
+goal=$1
+deps=$(rpm -q --qf '[%{REQUIRENAME}\n]'  $goal | egrep -v '^(rpmlib|rtld|config|/)')
+goals=
+while true; do
+  subs=$(rpm -q --qf '%{NAME}\n' --whatprovides $deps | sort -u | tr '\n' ' ')
+  if [ ."$subs" = ."$goals" ]; then
+    echo -n "$goals "
+    exit 0
+  fi
+  goals=$(echo $goals $subs | tr ' ' '\n' | sort -u | tr '\n' ' ')
+  for sub in $subs; do
+    subdeps=$(rpm -q --qf '[%{REQUIRENAME}\n]' $sub | egrep -v '^(rpmlib|rtld|config|/)')
+    deps=$(echo $deps $subdeps | sort -u)
+  done
+done
